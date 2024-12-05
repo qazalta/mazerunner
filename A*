@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define N 5
+
+typedef struct {
+    int x, y;
+} Point;
+
+typedef struct Node {
+    Point point;
+    int fCost;
+    struct Node* next;
+} Node;
+
+Node* createNode(Point p, int fCost) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->point = p;
+    newNode->fCost = fCost;
+    newNode->next = NULL;
+    return newNode;
+}
+
+void insertSorted(Node** head, Node* newNode) {
+    Node* current;
+    
+    if (*head == NULL || (*head)->fCost >= newNode->fCost) {
+        newNode->next = *head;
+        *head = newNode;
+    } else {
+        current = *head;
+        while (current->next != NULL && current->next->fCost < newNode->fCost) {
+            current = current->next;
+        }
+        newNode->next = current->next;
+        current->next = newNode;
+    }
+}
+
+bool isSafe(int maze[N][N], int x, int y) {
+    return (x >= 0 && x < N && y >= 0 && y < N && maze[x][y] == 1);
+}
+
+int heuristic(Point a, Point b) {
+    return abs(a.x - b.x) + abs(a.y - b.y);
+}
+
+bool AStar(int maze[N][N]) {
+    Point start = {0, 0};
+    Point goal = {N - 1, N - 1};
+    
+    Node* openList = NULL;
+
+    insertSorted(&openList, createNode(start, heuristic(start, goal)));
+
+    while (openList != NULL) {
+        Node* currentNode = openList;
+        openList = openList->next;
+
+        if (currentNode->point.x == goal.x && currentNode->point.y == goal.y) {
+            printf("Path found to the destination!\n");
+            free(currentNode);
+            return true;
+        }
+
+        free(currentNode); // Free the node after processing
+
+        // Check neighbors and add to open list
+        Point directions[4] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+        
+        for (int i = 0; i < 4; i++) {
+            Point neighbor = {currentNode->point.x + directions[i].x,
+                              currentNode->point.y + directions[i].y};
+
+            if (isSafe(maze, neighbor.x, neighbor.y)) {
+                int gCost = heuristic(start, neighbor); // Assuming gCost is the distance from start
+                int fCost = gCost + heuristic(neighbor, goal);
+                insertSorted(&openList, createNode(neighbor, fCost));
+            }
+        }
+    }
+
+    printf("No path found.\n");
+    return false;
+}
