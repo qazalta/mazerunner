@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define N 5
+
+typedef struct {
+    int x, y;
+} Point;
+
+typedef struct {
+    Point points[100];
+    int front, rear;
+} Queue;
+
+void enqueue(Queue *q, Point p) {
+    q->points[q->rear++] = p;
+}
+
+Point dequeue(Queue *q) {
+    return q->points[q->front++];
+}
+
+bool isEmpty(Queue *q) {
+    return q->front == q->rear;
+}
+
+bool BFS(int maze[N][N]) {
+    bool visited[N][N] = { {false} };
+    Queue q = { .front = 0, .rear = 0 };
+    
+    Point start = {0, 0};
+    enqueue(&q, start);
+    visited[0][0] = true;
+
+    while (!isEmpty(&q)) {
+        Point current = dequeue(&q);
+        
+        if (current.x == N - 1 && current.y == N - 1) {
+            printf("Reached the destination!\n");
+            return true;
+        }
+
+        int directions[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+        
+        for (int i = 0; i < 4; i++) {
+            int newX = current.x + directions[i][0];
+            int newY = current.y + directions[i][1];
+
+            if (newX >= 0 && newX < N && newY >= 0 && newY < N && 
+                maze[newX][newY] == 1 && !visited[newX][newY]) {
+                visited[newX][newY] = true;
+                Point nextPoint = {newX, newY};
+                enqueue(&q, nextPoint);
+            }
+        }
+    }
+    
+    printf("No path found.\n");
+    return false;
+}
