@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define N 5
+
+bool isSafe(int maze[N][N], int x, int y) {
+    return (x >= 0 && x < N && y >= 0 && y < N && maze[x][y] == 1);
+}
+
+bool solveMazeUtil(int maze[N][N], int x, int y) {
+    if (x == N - 1 && y == N - 1) return true;
+
+    if (isSafe(maze, x, y)) {
+        if (solveMazeUtil(maze, x + 1, y)) return true; // Move down
+        if (solveMazeUtil(maze, x, y + 1)) return true; // Move right
+        if (solveMazeUtil(maze, x - 1, y)) return true; // Move up
+        if (solveMazeUtil(maze, x, y - 1)) return true; // Move left
+    }
+    
+    return false; // Backtrack
+}
+
+void solveMaze(int maze[N][N]) {
+   if (!solveMazeUtil(maze, 0, 0))
+       printf("No solution exists\n");
+   else
+       printf("Solution found\n");
+}
