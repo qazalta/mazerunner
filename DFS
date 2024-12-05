@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define N 5
+
+bool isSafe(int maze[N][N], int x, int y) {
+    return (x >= 0 && x < N && y >= 0 && y < N && maze[x][y] == 1);
+}
+
+bool DFS(int maze[N][N], int x, int y, int sol[N][N]) {
+    if (x == N - 1 && y == N - 1) {
+        sol[x][y] = 1;
+        return true;
+    }
+
+    if (isSafe(maze, x, y)) {
+        sol[x][y] = 1;
+
+        if (DFS(maze, x + 1, y, sol)) return true; // Move down
+        if (DFS(maze, x, y + 1, sol)) return true; // Move right
+        if (DFS(maze, x - 1, y, sol)) return true; // Move up
+        if (DFS(maze, x, y - 1, sol)) return true; // Move left
+
+        sol[x][y] = 0; // Backtrack
+    }
+    return false;
+}
+
+void solveMaze(int maze[N][N]) {
+    int sol[N][N] = { {0} };
+    if (!DFS(maze, 0, 0, sol)) {
+        printf("No solution exists\n");
+    } else {
+        printf("Solution found:\n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++)
+                printf(" %d ", sol[i][j]);
+            printf("\n");
+        }
+    }
+}
